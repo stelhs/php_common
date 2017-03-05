@@ -46,7 +46,7 @@ function msg_log($msg_level, $text)
  * @param $print_stdout - optional flag indicates that all output from the process should be printed
  * @return array with keys: rc and log
  */
-function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false)
+function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $pid_file = "")
 {
     msg_log(LOG_NOTICE, 'run cmd: ' . $cmd);
 
@@ -57,12 +57,15 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false)
             throw new Exception("can't fork() in run_cmd()");
 
         if ($pid) // Current process return
-            return;
+            return $pid;
 
         // new process continue
         fclose(STDERR);
         fclose(STDIN);
         fclose(STDOUT);
+        
+        if ($pid_file)
+            file_put_contents($pid_file, posix_getpid());
     }
 
     $descriptorspec = array(
@@ -97,10 +100,26 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false)
     if ($rc == -1)
         throw new Exception("proc_close() error in run_cmd()");
 
-    if ($fork == true)
+    if ($fork == true) {
+        if ($pid_file)
+            unlink($pid_file);
         exit;
+    }
 
     return array('log' => trim($log), 'rc' => $rc);
+}
+
+function run_daemon($cmd, $pid_file)
+{
+    return run_cmd($cmd, true, '', false, $pid_file);
+}
+
+function stop_daemon($pid_file)
+{
+    if (!file_exists($pid_file))
+        return;
+        
+    kill_all(file_get_contents($pid_file));
 }
 
 /**
