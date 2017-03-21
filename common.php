@@ -55,7 +55,7 @@ function string_to_array($array) // Распарсить строку в мас�
 {
     $arr = explode(',', $array);
     foreach($arr as $item)
-        $result[$item] = $item;
+        $result[] = $item;
         
     return $result;
 }
