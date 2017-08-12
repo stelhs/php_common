@@ -38,6 +38,16 @@ function split_string($str)
     return $cleaned_words;
 }
 
+function strings_to_args($str)
+{
+    $args = array();
+    $words = split_string($str);
+    foreach ($words as $word)
+        $args[] = strtolower($word);
+
+    return $args;
+}
+
 function array_to_string($array) // Записать данные массива в строчку через запятую
 {
     $str = '';
@@ -56,7 +66,25 @@ function string_to_array($array) // Распарсить строку в мас�
     $arr = explode(',', $array);
     foreach($arr as $item)
         $result[] = $item;
-        
+
     return $result;
 }
 
+function parse_json_config($conf_file_name)
+{
+    $cfg_json = file_get_contents($conf_file_name);
+    if (!$cfg_json) {
+        msg_log(LOG_ERR, sprintf("Can't open config file %s\n",
+                                                 $conf_file_name));
+        return null;
+    }
+
+    $ret = json_decode($cfg_json);
+    if (!$ret) {
+        msg_log(LOG_ERR, sprintf("Can't parse config file %s\n",
+                                                 $conf_file_name));
+        return null;
+    }
+
+    return (array)$ret;
+}
