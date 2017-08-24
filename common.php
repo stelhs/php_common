@@ -13,6 +13,7 @@ define("EPARSE", 137); /* Parsing error */
 function dump($msg)
 {
     print_r($msg);
+    echo "\n";
 }
 
 /**
@@ -48,7 +49,7 @@ function strings_to_args($str)
     return $args;
 }
 
-function array_to_string($array) // Записать данные массива в строчку через запятую
+function array_to_string($array, $delimiter = ',') // Записать данные массива в строчку через запятую
 {
     $str = '';
     $seporator = '';
@@ -56,7 +57,7 @@ function array_to_string($array) // Записать данные массива
         foreach($array as $word)
         {
             $str .= $seporator . addslashes($word);
-            $seporator = ',';
+            $seporator = $delimiter;
         }
     return $str;
 }
