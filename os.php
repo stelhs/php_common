@@ -48,8 +48,6 @@ function msg_log($msg_level, $text)
  */
 function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $pid_file = "")
 {
-    msg_log(LOG_NOTICE, 'run cmd: ' . $cmd);
-
     if ($fork == true)
     {
         $pid = pcntl_fork();
@@ -106,6 +104,7 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $
         exit;
     }
 
+    msg_log(LOG_NOTICE, sprintf("run cmd: %s, returned: %s", $cmd, $log));
     return array('log' => trim($log), 'rc' => $rc);
 }
 
