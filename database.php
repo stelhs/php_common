@@ -5,11 +5,10 @@ class Database {
 
     function connect($array=array())
     {
-        
-        $this->link = mysqli_connect($array['host'], 
-                               $array['user'], 
-                               $array['pass'], 
-                               $array['database'], 
+        $this->link = mysqli_connect($array['host'],
+                               $array['user'],
+                               $array['pass'],
+                               $array['database'],
                                $array['port']);
         if(!$this->link) {
             msg_log(LOG_ERR, mysqli_connect_error());
@@ -26,7 +25,6 @@ class Database {
     {
         $data = array();
         $row = array();
-        
         $result = mysqli_query($this->link, $query);
 
         if($result === TRUE)
@@ -34,11 +32,11 @@ class Database {
 
         if($result === FALSE)
             return -ESQL;
-            
+
         $row = mysqli_fetch_assoc($result);
         if (!is_array($row))
             return null;
-            
+
         return $row;
     }
 
@@ -46,14 +44,14 @@ class Database {
     {
         $data = array();
         $row = array();
-        
+
         $result = mysqli_query($this->link, $query);
         if($result === TRUE)
             return 0;
 
         if($result === FALSE)
             return -ESQL;
-            
+
         $id = 0;
         while($row = mysqli_fetch_assoc($result)) {
             $id++;
@@ -74,14 +72,14 @@ class Database {
         foreach ($array as $field => $value) {
             if($field == 'id')
                 continue;
-            $query .= $separator . '`' .  $field . '`  = "' . $value . '"';
+            $query .= $separator . '`' .  $field . '` = "' . $value . '"';
             $separator = ',';
         }
-        
+
         $result = mysqli_query($this->link, $query);
         if($result === FALSE)
             return -ESQL;
-        
+
         return mysqli_insert_id($this->link);
     }
 
@@ -89,21 +87,21 @@ class Database {
     function update($table, $id, $array)
     {
         $separator = '';
-        $query = "UPDATE " . $table . " SET "; 
+        $query = "UPDATE " . $table . " SET ";
         foreach($array as $field     => $value) {
             $query .= $separator . '`' .  $field . '` = "' . $value . '"';
             $separator = ',';
         }
         $query .= " WHERE id = " . $id;
-        
+
         $update = mysqli_query($this->link, $query);
         if (!$update)
            return -ESQL;
-        
+
         return 0;
-        
+
     }
-    
+
     function commit()
     {
     	mysqli_commit($this->link);
@@ -114,8 +112,8 @@ class Database {
     {
         if(!mysqli_close($this->link))
            return -EBASE;
-        
-        return 0;   
+
+        return 0;
     }
 
 }

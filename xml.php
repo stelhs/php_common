@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 function xml_struct_to_array($values, &$i)
 {
     $child = array();
     if(isset($values[$i]['value']))
         array_push($child, $values[$i]['value']);
-    
+
     while($i++ < (count($values) - 1)) {
         switch($values[$i]['type']) {
         case 'cdata':
@@ -49,10 +49,10 @@ function parse_xml($xml) // Функция конвертирует XML в ма�
     xml_parser_free($parser);
     $i = 0;
     $name = $values[$i]['tag'];
-    
+
     if(isset($values[$i]['attributes']))
         $array[$name]['attributes'] =  $values[$i]['attributes'];
-        
+
     $array[$name]['content'] = xml_struct_to_array($values, $i);
     return $array;
 }

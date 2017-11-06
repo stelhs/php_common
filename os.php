@@ -11,13 +11,13 @@ function msg_log($msg_level, $text)
 {
     global $_CONFIG, $utility_name;
     $display_log_level = LOG_ERR;
-    
+
     if (defined("MSG_LOG_LEVEL"))
         $display_log_level = MSG_LOG_LEVEL;
-         
+
     if ($msg_level > $display_log_level)
         return;
-    
+
     syslog($msg_level, $utility_name . ': ' . $text);
     switch ($msg_level)
     {
@@ -40,7 +40,7 @@ function msg_log($msg_level, $text)
 /**
  * Run command in console and return output
  * @param $cmd - command
- * @param bool $fork - true - run in new thread (not receive results), 
+ * @param bool $fork - true - run in new thread (not receive results),
  * 			           false - run in current thread
  * @param $stdin_data - optional data direct to stdin
  * @param $print_stdout - optional flag indicates that all output from the process should be printed
@@ -57,11 +57,15 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $
         if ($pid) // Current process return
             return $pid;
 
+        register_shutdown_function(function(){
+                posix_kill(getmypid(), SIGKILL);
+        });
+
         // new process continue
         fclose(STDERR);
         fclose(STDIN);
         fclose(STDOUT);
-        
+
         if ($pid_file)
             file_put_contents($pid_file, posix_getpid());
     }
@@ -117,7 +121,7 @@ function stop_daemon($pid_file)
 {
     if (!file_exists($pid_file))
         return;
-        
+
     kill_all(file_get_contents($pid_file));
 }
 

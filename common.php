@@ -1,5 +1,5 @@
-<?php 
-    
+<?php
+
 define("EINVAL", 1); /* Inctorrect input parameters */
 define("EBASE", 2); /* Database error */
 define("ESQL", 3); /* SQL error */
@@ -9,11 +9,26 @@ define("ENODEV", 22);  /* No device or resourse found  */
 define("ECONNFAIL", 42); /* Connection fault */
 define("EPARSE", 137); /* Parsing error */
 
+function perror()
+{
+    $argv = func_get_args();
+    $format = array_shift($argv);
+    $msg = vsprintf($format, $argv);
+    fwrite(STDOUT, $msg);
+}
+
+function pnotice()
+{
+    $argv = func_get_args();
+    $format = array_shift($argv);
+    $msg = vsprintf($format, $argv);
+    fwrite(STDOUT, $msg);
+}
 
 function dump($msg)
 {
-    print_r($msg);
-    echo "\n";
+    perror(print_r($msg, 1));
+    perror("\n");
 }
 
 /**
@@ -24,7 +39,8 @@ function dump($msg)
 function split_string($str)
 {
     $cleaned_words = array();
-    $words = split("[ \t,]", $str);
+    $words = preg_split("/[ \t,]/", $str);
+
     if (!$words)
         return false;
 
@@ -32,7 +48,7 @@ function split_string($str)
         $cleaned_word = trim($word);
         if ($cleaned_word == '')
             continue;
-        
+
         $cleaned_words[] = trim($word);
     }
 
@@ -62,11 +78,13 @@ function array_to_string($array, $delimiter = ',') // Записать данн�
     return $str;
 }
 
-function string_to_array($array) // Распарсить строку в массива
+function string_to_array($array, $delimiter = ',') // Распарсить строку в массива
 {
-    $arr = explode(',', $array);
+    $result = [];
+    $arr = explode($delimiter, $array);
     foreach($arr as $item)
-        $result[] = $item;
+        if (trim($item))
+            $result[] = trim($item);
 
     return $result;
 }
@@ -89,3 +107,4 @@ function parse_json_config($conf_file_name)
 
     return (array)$ret;
 }
+
