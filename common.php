@@ -39,7 +39,7 @@ function dump($msg)
 function split_string($str)
 {
     $cleaned_words = array();
-    $words = preg_split("/[ \t,]/", $str);
+    $words = preg_split("/[ \t\:\,\.\;\-\=\!]/", $str);
 
     if (!$words)
         return false;
