@@ -173,4 +173,21 @@ function kill_all($kill_pid)
 }
 
 
+function get_pid_list_by_command($command)
+{
+    $pid_list = [];
+    $rc = run_cmd("ps -aux");
+    $content = $rc['log'];
+    $lines = string_to_rows($content);
+    foreach ($lines as $line) {
+        $cols = split_string_by_separators($line, " \t");
+        if ($cols[10] != $command)
+            continue;
+        $pid_list[] = $cols[1];
+    }
+    return $pid_list;
+}
+
+
+
 ?>
