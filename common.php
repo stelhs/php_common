@@ -27,8 +27,8 @@ function pnotice()
 
 function dump($msg)
 {
-    perror(print_r($msg, 1));
-    perror("\n");
+    print_r($msg, 1);
+    print_r("\n");
 }
 
 /**
