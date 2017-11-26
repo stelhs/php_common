@@ -27,7 +27,7 @@ function pnotice()
 
 function dump($msg)
 {
-    print_r($msg, 1);
+    print_r($msg);
     print_r("\n");
 }
 
@@ -49,11 +49,33 @@ function split_string($str)
         if ($cleaned_word == '')
             continue;
 
-        $cleaned_words[] = trim($word);
+        $cleaned_words[] = $cleaned_word;
     }
 
     return $cleaned_words;
 }
+
+
+function string_to_rows($str)
+{
+    $cleaned_rows = [];
+    $rows = preg_split("/[\n]/", $str);
+
+    if (!$rows)
+        return false;
+
+    foreach ($rows as $row) {
+        $cleaned_row = trim($row);
+        if ($cleaned_row == '')
+            continue;
+
+        $cleaned_rows[] = $cleaned_row;
+    }
+
+    return $cleaned_rows;
+}
+
+
 
 function strings_to_args($str)
 {
