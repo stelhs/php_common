@@ -31,15 +31,25 @@ function dump($msg)
     print_r("\n");
 }
 
-/**
- * Split string on words
- * @param $str - string
- * @return array of words
- */
-function split_string($str)
+function string_to_words($str)
+{
+    return split_string_by_separators($str, " \t:,.;+-=!");
+}
+
+
+function split_string_by_separators($str, $separate_symbols = "")
 {
     $cleaned_words = array();
-    $words = preg_split("/[ \t\:\,\.\;\-\=\!]/", $str);
+    $pattern = "";
+    $pattern_len = strlen($separate_symbols);
+    if (!$pattern_len)
+        return false;
+
+    for ($i = 0; $i < $pattern_len; $i++) {
+        $sym = $separate_symbols[$i];
+        $pattern .= "\\" . $sym;
+    }
+    $words = preg_split(sprintf("/[%s]/", $pattern), $str);
 
     if (!$words)
         return false;
