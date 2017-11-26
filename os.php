@@ -188,6 +188,36 @@ function get_pid_list_by_command($command)
     return $pid_list;
 }
 
+function get_list_subdirs($dir)
+{
+    $dirs = [];
+    @$rows = scandir($dir);
+    if (!is_array($rows))
+        return false;
+    foreach ($rows as $row) {
+        if (!is_dir($dir . $row))
+            continue;
+        if ($row == '.' || $row == '..')
+            continue;
+        $dirs[] = $row;
+    }
+    return $dirs;
+}
+
+function get_list_files($dir)
+{
+    $dirs = [];
+    @$rows = scandir($dir);
+    if (!is_array($rows))
+        return false;
+    foreach ($rows as $row) {
+        if (is_dir($dir . $row))
+            continue;
+        $dirs[] = $row;
+    }
+    return $dirs;
+}
+
 
 
 ?>
