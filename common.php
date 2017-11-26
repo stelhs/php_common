@@ -68,21 +68,7 @@ function split_string_by_separators($str, $separate_symbols = "")
 
 function string_to_rows($str)
 {
-    $cleaned_rows = [];
-    $rows = preg_split("/[\n]/", $str);
-
-    if (!$rows)
-        return false;
-
-    foreach ($rows as $row) {
-        $cleaned_row = trim($row);
-        if ($cleaned_row == '')
-            continue;
-
-        $cleaned_rows[] = $cleaned_row;
-    }
-
-    return $cleaned_rows;
+    return split_string_by_separators($str, "\n");
 }
 
 
