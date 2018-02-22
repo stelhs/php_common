@@ -76,7 +76,7 @@ function string_to_rows($str)
 function strings_to_args($str)
 {
     $args = array();
-    $words = split_string($str);
+    $words = string_to_words($str);
     foreach ($words as $word)
         $args[] = strtolower($word);
 
