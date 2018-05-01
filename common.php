@@ -31,9 +31,9 @@ function dump($msg)
     print_r("\n");
 }
 
-function string_to_words($str)
+function string_to_words($str, $sep = " \t:,.;+-=!")
 {
-    return split_string_by_separators($str, " \t:,.;+-=!");
+    return split_string_by_separators($str, $sep);
 }
 
 
