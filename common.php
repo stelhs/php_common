@@ -9,6 +9,41 @@ define("ENODEV", 22);  /* No device or resourse found  */
 define("ECONNFAIL", 42); /* Connection fault */
 define("EPARSE", 137); /* Parsing error */
 
+
+/**
+ * Logging function
+ * @param $msg_level LOG_ERR or LOG_WARNING or LOG_NOTICE
+ * @param $text - error description
+ */
+function msg_log($msg_level, $text)
+{
+    global $_CONFIG, $utility_name;
+    $display_log_level = LOG_ERR;
+
+    if (defined("MSG_LOG_LEVEL"))
+        $display_log_level = MSG_LOG_LEVEL;
+
+    if ($msg_level > $display_log_level)
+        return;
+
+    syslog($msg_level, $utility_name . ': ' . $text);
+    switch ($msg_level)
+    {
+        case LOG_WARNING:
+            echo $utility_name . ': Warning: ' . $text . "\n";
+            break;
+
+        case LOG_NOTICE:
+            echo $utility_name . ': ' . $text . "\n";
+            break;
+
+        case LOG_ERR:
+            echo $utility_name . ': Error: ' . $text . "\n";
+            break;
+    }
+}
+
+
 function perror()
 {
     $argv = func_get_args();

@@ -1,42 +1,5 @@
 <?php
 
-
-
-/**
- * Logging function
- * @param $msg_level LOG_ERR or LOG_WARNING or LOG_NOTICE
- * @param $text - error description
- */
-function msg_log($msg_level, $text)
-{
-    global $_CONFIG, $utility_name;
-    $display_log_level = LOG_ERR;
-
-    if (defined("MSG_LOG_LEVEL"))
-        $display_log_level = MSG_LOG_LEVEL;
-
-    if ($msg_level > $display_log_level)
-        return;
-
-    syslog($msg_level, $utility_name . ': ' . $text);
-    switch ($msg_level)
-    {
-        case LOG_WARNING:
-            echo $utility_name . ': Warning: ' . $text . "\n";
-            break;
-
-        case LOG_NOTICE:
-            echo $utility_name . ': ' . $text . "\n";
-            break;
-
-        case LOG_ERR:
-            echo $utility_name . ': Error: ' . $text . "\n";
-            break;
-    }
-}
-
-
-
 /**
  * Run command in console and return output
  * @param $cmd - command
