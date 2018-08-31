@@ -182,5 +182,33 @@ function get_list_files($dir)
 }
 
 
+function get_free_space($dev_path = "")
+{
+    require_once '/usr/local/lib/php/common.php';
+
+    $ret = run_cmd("df " . $dev_path);
+    if ($ret['rc'])
+        return;
+
+    $data = [];
+    $rows = string_to_rows($ret['log']);
+    foreach ($rows as $row) {
+        $words = split_string_by_separators($row, ' ');
+        if ($words[0] == 'Filesystem')
+            continue;
+
+        $dev_data = ['dev_name' => $words[0],
+                     'size'     => $words[1] * 1024,
+                     'used'     => $words[2] * 1024,
+                     'avail'    => $words[3] * 1024,
+                     'use'      => str_replace('%', '', $words[4]),
+                    ];
+        if ($dev_path)
+            return $dev_data;
+        $data[] = $dev_data;
+    }
+    return $data;
+}
+
 
 ?>
