@@ -161,37 +161,3 @@ function parse_json_config($conf_file_name)
     return (array)$ret;
 }
 
-
-function get_mdstat()
-{
-    $stat = file("/proc/mdstat");
-
-    if (!isset($stat[2]))
-        return array('mode' => 'no_exist');
-
-    if (isset($stat[3])) {
-        preg_match('/resync[ ]+=[ ]+([0-9\.]+)\%/', $stat[3], $matches);
-        if (isset($matches[1]))
-            return array('mode' => 'resync',
-                         'progress' => $matches[1]);
-
-        preg_match('/recovery[ ]+=[ ]+([0-9\.]+)\%/', $stat[3], $matches);
-        if (isset($matches[1]))
-            return array('mode' => 'recovery',
-                         'progress' => $matches[1]);
-    }
-
-    preg_match('/\[[U_]+\]/', $stat[2], $matches);
-    $mode = $matches[0];
-
-    if ($mode == '[UU]')
-        return array('mode' => 'normal');
-
-    if ($mode == '[_U]' || $mode == '[U_]')
-        return array('mode' => 'damage');
-
-    return array('mode' => 'parse_err');
-}
-
-
-

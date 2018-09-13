@@ -211,4 +211,39 @@ function get_free_space($dev_path = "")
 }
 
 
+
+function get_mdstat()
+{
+    $stat = file("/proc/mdstat");
+
+    if (!isset($stat[2]))
+        return ['state' => 'no_exist'];
+
+    if (isset($stat[3])) {
+        preg_match('/resync[ ]+=[ ]+([0-9\.]+)\%/', $stat[3], $matches);
+        if (isset($matches[1]))
+            return ['state' => 'resync',
+                    'progress' => $matches[1]];
+
+        preg_match('/recovery[ ]+=[ ]+([0-9\.]+)\%/', $stat[3], $matches);
+        if (isset($matches[1]))
+            return ['state' => 'recovery',
+                    'progress' => $matches[1]];
+    }
+
+    preg_match('/\[[U_]+\]/', $stat[2], $matches);
+    $mode = $matches[0];
+
+    if ($mode == '[UU]')
+        return ['state' => 'normal'];
+
+    if ($mode == '[_U]' || $mode == '[U_]')
+        return ['state' => 'damage'];
+
+    return ['state' => 'parse_err'];
+}
+
+
+
+
 ?>
