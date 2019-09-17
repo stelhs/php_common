@@ -136,7 +136,7 @@ function string_to_array($array, $delimiter = ',') // Распарсить ст�
     $result = [];
     $arr = explode($delimiter, $array);
     foreach($arr as $item)
-        if (trim($item))
+        if (trim($item) !== NULL)
             $result[] = trim($item);
 
     return $result;
