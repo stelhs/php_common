@@ -30,8 +30,10 @@ class Database {
         if($result === TRUE)
             return 0;
 
-        if($result === FALSE)
+        if($result === FALSE) {
+            printf("MySQL query error: %s\n", mysqli_error($this->link));
             return -ESQL;
+        }
 
         $row = mysqli_fetch_assoc($result);
         if (!is_array($row))
@@ -75,7 +77,6 @@ class Database {
             $query .= $separator . '`' .  $field . '` = "' . $value . '"';
             $separator = ',';
         }
-
         $result = mysqli_query($this->link, $query);
         if($result === FALSE)
             return -ESQL;
