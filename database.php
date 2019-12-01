@@ -3,15 +3,24 @@
 class Database {
     private $link;
 
-    function connect($array=array())
+    private function err()
     {
-        $this->link = mysqli_connect($array['host'],
-                               $array['user'],
-                               $array['pass'],
-                               $array['database'],
-                               $array['port']);
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $msg = vsprintf($format, $argv);
+        openlog("database", LOG_NDELAY | LOG_PERROR, LOG_USER);
+        syslog(LOG_ERR, $msg);
+    }
+
+    function connect($conf)
+    {
+        $this->link = mysqli_connect($conf['host'],
+                                     $conf['user'],
+                                     $conf['pass'],
+                                     $conf['database'],
+                                     $conf['port']);
         if(!$this->link) {
-            msg_log(LOG_ERR, mysqli_connect_error());
+            $this->err("Database connection error: %s", mysqli_connect_error());
             return -ESQL;
         }
 
@@ -31,7 +40,8 @@ class Database {
             return 0;
 
         if($result === FALSE) {
-            printf("MySQL query error: %s\n", mysqli_error($this->link));
+            $this->err("MySQL query error: '%s' error: %s",
+                       $query, mysqli_error($this->link));
             return -ESQL;
         }
 
@@ -51,8 +61,11 @@ class Database {
         if($result === TRUE)
             return 0;
 
-        if($result === FALSE)
+        if($result === FALSE) {
+            $this->err("MySQL query error: '%s' error: %s",
+                       $query, mysqli_error($this->link));
             return -ESQL;
+        }
 
         $id = 0;
         while($row = mysqli_fetch_assoc($result)) {
@@ -78,8 +91,11 @@ class Database {
             $separator = ',';
         }
         $result = mysqli_query($this->link, $query);
-        if($result === FALSE)
+        if($result === FALSE) {
+            $this->err("MySQL query error: '%s' error: %s",
+                       $query, mysqli_error($this->link));
             return -ESQL;
+        }
 
         return mysqli_insert_id($this->link);
     }
@@ -96,8 +112,11 @@ class Database {
         $query .= " WHERE id = " . $id;
 
         $update = mysqli_query($this->link, $query);
-        if (!$update)
-           return -ESQL;
+        if (!$update) {
+            $this->err("MySQL query error: '%s' error: %s",
+                $query, mysqli_error($this->link));
+            return -ESQL;
+        }
 
         return 0;
 
