@@ -138,4 +138,19 @@ class Database {
 
 }
 
+function db()
+{
+    static $db = NULL;
+
+    if ($db)
+        return $db;
+
+    $db = new Database();
+    $rc = $db->connect(conf_db());
+    if ($rc)
+        throw new Exception("can't connect to database");
+    return $db;
+}
+
+
 ?>
