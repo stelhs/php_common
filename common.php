@@ -11,7 +11,7 @@ define("EPARSE", 137); /* Parsing error */
 
 
 /**
- * Logging function
+ * DEPRICATED: Logging function
  * @param $msg_level LOG_ERR or LOG_WARNING or LOG_NOTICE
  * @param $text - error description
  */
@@ -43,13 +43,13 @@ function msg_log($msg_level, $text)
     }
 }
 
-
 function perror()
 {
     $argv = func_get_args();
     $format = array_shift($argv);
     $msg = vsprintf($format, $argv);
-    fwrite(STDOUT, $msg);
+    $f = fopen('php://stderr','w');
+    fwrite($f, $msg);
 }
 
 function pnotice()
@@ -57,7 +57,69 @@ function pnotice()
     $argv = func_get_args();
     $format = array_shift($argv);
     $msg = vsprintf($format, $argv);
-    fwrite(STDOUT, $msg);
+    $f = fopen('php://stdout','w');
+    fwrite($f, $msg);
+}
+
+// Read logs by: "sudo journalctl -t $subsystem -f"
+function plog($log_level, $subsystem, $msg)
+{
+    $prio_text = ["LOG_EMERG",
+        "LOG_ALERT",
+        "LOG_CRIT",
+        "LOG_ERR",
+        "LOG_WARNING",
+        "LOG_NOTICE",
+        "LOG_INFO",
+        "LOG_DEBUG"];
+
+    //  perror("%s: %s: %s\n", $prio_text[$log_level], $subsystem, $msg);
+    openlog($subsystem, LOG_NDELAY | LOG_PERROR, LOG_USER);
+    syslog($log_level, $msg);
+}
+
+class Plog {
+    function __construct($subsystem)
+    {
+        $this->subsystem = $subsystem;
+    }
+
+    private function line($msg)
+    {
+        $trace = debug_backtrace();
+        array_shift($trace);
+        $info = array_shift($trace);
+        $line = $info['line'];
+        $file = $info['file'];
+        $info = array_shift($trace);
+        $function = $info['function'];
+        return sprintf("%s: %s() +%d: %s", $file, $function, $line, $msg);
+    }
+
+    function err()
+    {
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $msg = vsprintf($format, $argv);
+
+        plog(LOG_ERR, $this->subsystem, $this->line($msg));
+    }
+
+    function warn()
+    {
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $msg = vsprintf($format, $argv);
+        plog(LOG_WARNING, $this->subsystem, $msg);
+    }
+
+    function info()
+    {
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $msg = vsprintf($format, $argv);
+        plog(LOG_INFO, $this->subsystem, $msg);
+    }
 }
 
 function dump($msg)
