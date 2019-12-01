@@ -3,13 +3,13 @@
 class Database {
     private $link;
 
-    function connect($array=array())
+    function connect($conf = [])
     {
-        $this->link = mysqli_connect($array['host'],
-                               $array['user'],
-                               $array['pass'],
-                               $array['database'],
-                               $array['port']);
+        $this->link = mysqli_connect($conf['host'],
+                                     $conf['user'],
+                                     $conf['pass'],
+                                     $conf['database'],
+                                     $conf['port']);
         if(!$this->link) {
             msg_log(LOG_ERR, mysqli_connect_error());
             return -ESQL;
@@ -118,5 +118,20 @@ class Database {
     }
 
 }
+
+function db()
+{
+    static $db = NULL;
+
+    if ($db)
+        return $db;
+
+    $db = new Database();
+    $rc = $db->connect(conf_db());
+    if ($rc)
+        throw new Exception("can't connect to database");
+    return $db;
+}
+
 
 ?>
