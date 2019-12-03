@@ -30,10 +30,14 @@ class Database {
         return 0;
     }
 
-    function query($query)
+    function query()
     {
-        $data = array();
-        $row = array();
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $query = vsprintf($format, $argv);
+
+        $data = [];
+        $row = [];
         $result = mysqli_query($this->link, $query);
 
         if($result === TRUE)
@@ -52,10 +56,14 @@ class Database {
         return $row;
     }
 
-    function query_list($query)
+    function query_list()
     {
-        $data = array();
-        $row = array();
+        $argv = func_get_args();
+        $format = array_shift($argv);
+        $query = vsprintf($format, $argv);
+
+        $data = [];
+        $row = [];
 
         $result = mysqli_query($this->link, $query);
         if($result === TRUE)
