@@ -30,7 +30,7 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $
         fclose(STDOUT);
 
         if ($pid_file)
-            file_put_contents($pid_file, posix_getpid());
+            file_put_contents($pid_file, sprintf("%d, %d", posix_getpid()));
     }
 
     $descriptorspec = array(
@@ -83,9 +83,12 @@ function run_daemon($cmd, $pid_file)
 function stop_daemon($pid_file)
 {
     if (!file_exists($pid_file))
-        return;
+        return -EINVAL;
 
-    kill_all(file_get_contents($pid_file));
+    $pid = file_get_contents($pid_file);
+    kill_all($pid);
+    unlink($pid_file);
+    return 0;
 }
 
 /**

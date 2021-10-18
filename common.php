@@ -197,6 +197,9 @@ function string_to_array($array, $delimiter = ',') // Распарсить ст�
 {
     $result = [];
     $arr = explode($delimiter, $array);
+    if (!$arr || !count($arr))
+        return [];
+
     foreach($arr as $item)
         if (trim($item) !== NULL)
             $result[] = trim($item);
