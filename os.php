@@ -30,7 +30,7 @@ function run_cmd($cmd, $fork = false, $stdin_data = '', $print_stdout = false, $
         fclose(STDOUT);
 
         if ($pid_file)
-            file_put_contents($pid_file, sprintf("%d, %d", posix_getpid()));
+            file_put_contents($pid_file, posix_getpid());
     }
 
     $descriptorspec = array(
