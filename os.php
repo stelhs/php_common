@@ -247,6 +247,12 @@ function get_mdstat()
 }
 
 
+function unlink_safe($file)
+{
+    if (!file_exists($file))
+        return;
+    @unlink($file);
+}
 
 
 ?>

@@ -43,8 +43,25 @@ function msg_log($msg_level, $text)
     }
 }
 
+$perror_pnotice_disabled = false;
+function p_disable()
+{
+    global $perror_pnotice_disabled;
+    $perror_pnotice_disabled = true;
+}
+
+function p_enable()
+{
+    global $perror_pnotice_disabled;
+    $perror_pnotice_disabled = false;
+}
+
 function perror()
 {
+    global $perror_pnotice_disabled;
+    if ($perror_pnotice_disabled)
+        return;
+
     $argv = func_get_args();
     $format = array_shift($argv);
     $msg = vsprintf($format, $argv);
@@ -54,6 +71,10 @@ function perror()
 
 function pnotice()
 {
+    global $perror_pnotice_disabled;
+    if ($perror_pnotice_disabled)
+        return;
+
     $argv = func_get_args();
     $format = array_shift($argv);
     $msg = vsprintf($format, $argv);
@@ -64,6 +85,8 @@ function pnotice()
 // Read logs by: "sudo journalctl -t $subsystem -f"
 function plog($log_level, $subsystem, $msg)
 {
+    global $perror_pnotice_disabled;
+
     $prio_text = ["LOG_EMERG",
         "LOG_ALERT",
         "LOG_CRIT",
@@ -73,9 +96,43 @@ function plog($log_level, $subsystem, $msg)
         "LOG_INFO",
         "LOG_DEBUG"];
 
-    //  perror("%s: %s: %s\n", $prio_text[$log_level], $subsystem, $msg);
-    openlog($subsystem, LOG_NDELAY | LOG_PERROR, LOG_USER);
+    openlog($subsystem, LOG_NDELAY, LOG_USER);
     syslog($log_level, $msg);
+
+    $cmd = sprintf("%s: %s: %s\n", $prio_text[$log_level], $subsystem, $msg);
+    if ($log_level <= 4)
+        perror($cmd);
+    else
+        pnotice($cmd);
+}
+
+function backtrace_to_str($skip = 0)
+{
+    $bt = debug_backtrace();
+    array_shift($bt);
+    if ($skip)
+        for($i = 0; $i < $skip; $i++)
+            array_shift($bt);
+
+    $str = "Backtrace: \n";
+
+    $num = 1;
+    foreach ($bt as $row) {
+        $args = '';
+        if (isset($row['args']) and count($row['args'])) {
+            $sep = '';
+            foreach ($row['args'] as $arg) {
+                $args .= sprintf("%s%s", $sep, print_r($arg, 1));
+                $sep = ', ';
+            }
+        }
+
+        $str .= sprintf("%d: %s:%d %s(%s)\n",
+                        $num, $row['file'], $row['line'],
+                        $row['function'], $args);
+        $num ++;
+    }
+    return $str;
 }
 
 class Plog {
@@ -101,7 +158,7 @@ class Plog {
         $argv = func_get_args();
         $format = array_shift($argv);
         $msg = vsprintf($format, $argv);
-
+        $msg .= "\n" . backtrace_to_str();
         plog(LOG_ERR, $this->subsystem, $this->line($msg));
     }
 
@@ -124,6 +181,10 @@ class Plog {
 
 function dump($msg)
 {
+    global $perror_pnotice_disabled;
+    if ($perror_pnotice_disabled)
+        return;
+
     print_r($msg);
     print_r("\n");
 }
