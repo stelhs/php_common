@@ -101,9 +101,9 @@ function plog($log_level, $subsystem, $msg)
 
     $cmd = sprintf("%s: %s: %s\n", $prio_text[$log_level], $subsystem, $msg);
     if ($log_level <= 4)
-        perror($cmd);
+        perror("%s", $cmd);
     else
-        pnotice($cmd);
+        pnotice("%s", $cmd);
 }
 
 function backtrace_to_str($skip = 0)
