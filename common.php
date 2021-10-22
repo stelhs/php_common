@@ -122,7 +122,7 @@ function backtrace_to_str($skip = 0)
         if (isset($row['args']) and count($row['args'])) {
             $sep = '';
             foreach ($row['args'] as $arg) {
-                $args .= sprintf("%s%s", $sep, print_r($arg, 1));
+                $args .= sprintf("%s%s", $sep, substr(print_r($arg, 1), 0, 100));
                 $sep = ', ';
             }
         }
