@@ -141,7 +141,7 @@ class Plog {
         $this->subsystem = $subsystem;
     }
 
-    private function line($msg)
+    private function line($msg, $level)
     {
         $trace = debug_backtrace();
         array_shift($trace);
@@ -150,7 +150,20 @@ class Plog {
         $file = $info['file'];
         $info = array_shift($trace);
         $function = $info['function'];
-        return sprintf("%s: %s() +%d: %s", $file, $function, $line, $msg);
+        switch ($level) {
+            case LOG_ERR:
+                $level_str = 'Error';
+                break;
+
+            case LOG_WARNING:
+                $level_str = 'Warning';
+                break;
+
+            default:
+                $level_str = 'Info';
+        }
+        return sprintf("%s: %s: %s() +%d: %s",
+                       $level_str, $file, $function, $line, $msg);
     }
 
     function err()
@@ -159,14 +172,14 @@ class Plog {
         $format = array_shift($argv);
         $msg = vsprintf($format, $argv);
         $msg .= "\n" . backtrace_to_str();
-        plog(LOG_ERR, $this->subsystem, $this->line($msg));
+        plog(LOG_ERR, $this->subsystem, $this->line($msg, LOG_ERR));
     }
 
     function warn()
     {
         $argv = func_get_args();
         $format = array_shift($argv);
-        $msg = vsprintf($format, $argv);
+        $msg = "Warning: " . vsprintf($format, $argv);
         plog(LOG_WARNING, $this->subsystem, $msg);
     }
 
