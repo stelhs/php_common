@@ -1,6 +1,6 @@
 <?php
 /**
-*    Шаблонизатор StrontiumTPL. 
+*    Шаблонизатор StrontiumTPL.
 *    By Michail Kurochkin stelhs@ya.ru
 *    18.08.2008
 */
@@ -29,7 +29,7 @@
         // Дерево данных для вывода в компилированный шаблон.
         // В режиме компиляции вызов метода assign формирует и дополняет этот деревовидный массив
         var $assign_tree;
-        
+
 
         /**
             Конструктор класса
@@ -41,7 +41,7 @@
         {
             if ($filename)
                 $this->open($filename, $default_marks, $enable_compile);
-            
+
             $this->assign_stack[] = 'root';
         }
 
@@ -58,12 +58,12 @@
                 echo 'Error: Teamplate "' . $filename . '" not exist';
                 exit();
             }
-            
+
             if ($default_marks)
                 $this->set_default_marks($default_marks);
 
             $this->enable_compile = $enable_compile;
-            
+
             $path = $this->get_file_path($filename);
             $file = $this->get_file_name($filename);
 
@@ -76,7 +76,7 @@
                 // загрузка некомпилированного шаблона
                 return $this->open_buffer($tpl_content);
             }
-            
+
             // для режима компиляции
 
             // если компилируемый файл отсутсвует или присутствует
@@ -89,13 +89,13 @@
                 $tpl_content = $this->strip_comments($tpl_content);
                 $this->tpl_compile_teamplate($tpl_content, $filename);
             }
-            
+
             // Опускаем флаг разрешающий запуск шаблона
             $run_teamplate = 0;
-            
+
             // Подключение компилированного шаблона
             require($path . '.compiled/' . $file . '.php');
-            
+
             // Сохранение имени файла шаблона, для последующей подгрузки шаблона в методе make_result()
             $this->tpl_filename = $filename;
         }
@@ -112,14 +112,15 @@
                 echo 'Error: open_buffer() is not work in compiled mode';
                 exit;
             }
-            
+
             $tpl_content = $this->strip_comments($tpl_content);
 
             // Сохранение шаблона для дальнейшей обработки
             $this->result_content = $this->source_content = $tpl_content;
-            
+
             // Замена всех блоков на временные позывные метки
             $blocks = $this->find_blocks('BLOCK', $this->result_content);
+            $list_blocks = [];
             foreach ($blocks as $block) {
                 foreach($block as $block_name => $block_data);
                 // Сохронение содержимого найденного блока
@@ -131,12 +132,12 @@
                                                              $block_name,
                                                              '<<-' . $block_name . '->>');
             }
-            
+
             // Возврат списока блоков с их содержимым
             return $list_blocks;
         }
-        
-        
+
+
         /**
             Заполнение указанного блока данными
             @param $block_name - Имя блока
@@ -144,11 +145,11 @@
         */
         function assign($assign_block = false, $data = false)
         {
-            // Добавление меток по умолчанию и их значений 
+            // Добавление меток по умолчанию и их значений
             if ($this->default_marks_val) {
                 if (!is_array($data))
                     $data = array();
-                    
+
                 foreach ($this->default_marks_val as $mark => $val)
                     // Если такая метка ранее небыла определена
                     if (!isset($data[$mark]))
@@ -168,15 +169,15 @@
                     $this->add_node_to_assign_tree($this->assign_stack, $data);
                     return;
                 }
-                
+
                 // Извлечение из стека блоков (по пути назад) и на каждом уровне
                 // ищется дочерний блок соответсвующий $assign_block
                 // сохраняется копия стека на случай если имя блока окажется несуществующим
                 $stack = $this->assign_stack;
                 while ($parent_block = array_pop($stack)) {
-                    // Для каждого блока parent_block в стеке, 
+                    // Для каждого блока parent_block в стеке,
                     // извлекается список дочерних блоков
-                    $children_blocks = 
+                    $children_blocks =
                         $this->get_children_blocks_by_tree($parent_block,
                                                            $this->compiled_struct_tree);
                     // Если дочерних блоков не найденно, то явно что чтото нетак
@@ -188,7 +189,7 @@
                     if ($key !== FALSE) {
                         array_push($stack, $parent_block);
                         $this->assign_stack = $stack;
-                        
+
                         // добавляется в стек текущий блок
                         array_push($this->assign_stack, $assign_block);
 
@@ -200,16 +201,16 @@
 
                 return;
             }
-        
+
             // Если режим компиляции выключен, то выполняем весь остальной код
 
             // Если явно задан блок, то загрузка блока
             if ($assign_block)
                 $content = $this->load_block($assign_block);
-            else 
+            else
                 // Иначе загрузка всего контента
                 $content = $this->source_content;
-            
+
             // Если в загруженном шаблоне встретились блоки
             while (preg_match("/<!--[ ]*START[ ]+BLOCK[ ]*:[ ]*([a-zA-Z0-9_\.\/]+)[ ]*-->/s",
                              $content,
@@ -227,7 +228,7 @@
                                                     "",
                                                     $this->result_content);
             }
-            
+
             // Если есть что заасайнить, то производится асайн
             if (is_array($data))
                 foreach($data as $key => $value)
@@ -246,8 +247,8 @@
             // то обновляется source_content.
             // Это нужно для того, чтобы в корневой блок
             // можно было асайнить много раз подряд
-            $this->result_content = $content; 
-            
+            $this->result_content = $content;
+
             // поиск всех блоковых меток и замена сформированными данными
             preg_match_all("/<<-(.*)->>/Us", $content, $extract);
             $list_blocks = $extract[1];
@@ -261,17 +262,17 @@
                                         $content);
             }
 
-            $this->source_content = $content; 
+            $this->source_content = $content;
         }
-        
-        
+
+
         /**
             Осуществить рекурсивный ассайн дерева блоков с метками.
             @param $assign_data - Дерево блоков с метками
         */
         function assign_array($assign_data)
         {
-            if (!$assign_data['block'])
+            if (!isset($assign_data['block']) or !$assign_data['block'])
                 return;
 
             foreach($assign_data['block'] as $assign_block_data) {
@@ -283,8 +284,8 @@
                     $this->assign_array($block_data);
             }
         }
-        
-        
+
+
         /**
             Получить заполненный шаблон
             @return результирующий текст сформированный из шаблонов и данных
@@ -303,7 +304,7 @@
                 require($path . '.compiled/' . $file . '.php');
                 return $compiled_block_root;
             }
-            
+
             // Режим компиляции
 
             // отчистка от ненужных блоковых меток
@@ -316,7 +317,7 @@
             $this->result_content = preg_replace("/(<!--.*->)/Us", "", $this->result_content);
             return $this->result_content;
         }
-        
+
         /**
             Установка меток поумолчанию.
             Эти метки будут добавленны во все блоки в которые будет вызываться assign
@@ -336,11 +337,11 @@
         {
             if (!$block_name)
                 return;
-            
+
             return $this->find_block('BLOCK', $block_name, $this->source_content);
         }
 
-        
+
         /**
             Поиск статических меток и их значений для
             их дальнейшей подгрузки в подгружаемый шаблон
@@ -349,9 +350,9 @@
             @param $buffer - Текст шаблона
             @return массив в формате (метка => значение)
         */
-        private function find_static_marks_values($buffer) 
+        private function find_static_marks_values($buffer)
         {
-            $marks_info = array(); 
+            $marks_info = array();
             // Удаление всех ассайнов на блоки
             $buffer = preg_replace("/<!--[ ]*START[ ]+ASSIGN[ ]*:.*-->.*<!--[ ]*END[ ]+ASSIGN[ ]*:.*-->/Us",
                                    '',
@@ -366,12 +367,12 @@
                 preg_match("/<" . $mark .">(.*)<\/" . $mark .">/Us", $buffer, $extract);
                 $marks_info[$mark] = trim($extract[1]);
             }
-            
+
             // Возврат отчета в формате имя_метки => значение
-            return $marks_info; 
+            return $marks_info;
         }
-        
-        
+
+
         /**
             Поиск блоков $block_type типа
             @param $block_type - Тип блока (возможные типы: BLOCK, INSERT, ASSIGN)
@@ -384,15 +385,15 @@
             $found_blocks = 1;
             while($found_blocks) {
                 preg_match("/<!-- *START +" . $block_type . " *: *([a-zA-Z0-9_\.\/]*) *-->/s",
-                           $buffer, $found_blocks); 
+                           $buffer, $found_blocks);
 
-                $block_name = $found_blocks[1];
+                $block_name = isset($found_blocks[1]) ? $found_blocks[1] : NULL;
                 if($block_name) {
                      // Извлечение данных блока
-                    $rc = preg_match("/<!-- *START +" . 
-                                         $block_type . 
-                                         " *: *" . 
-                                         $this->shielding_block_name($block_name) . 
+                    $rc = preg_match("/<!-- *START +" .
+                                         $block_type .
+                                         " *: *" .
+                                         $this->shielding_block_name($block_name) .
                                          " *-->(.*)<!-- *END +" .
                                          $block_type .
                                          " *: *" .
@@ -403,7 +404,7 @@
                               $block_type . ' : ' . $block_name . ' -->';
                         exit;
                     }
-                    
+
                     $block_data = $matches[1];
 
                     // Удаление найденного блока из буфера, чтобы не натыкаться на него повторно
@@ -413,11 +414,11 @@
                     $blocks_data[][$block_name] = $block_data;
                 }
             }
-            
+
             return $blocks_data;
         }
-        
-        
+
+
         /**
             Экранирование служебных символов
             которые могут встретиться в имени блока.
@@ -430,11 +431,11 @@
             $chars = array('.', '/', ',');
             foreach ($chars as $char)
                 $str = str_replace($char, "\\" . $char, $str);
-            
+
             return $str;
         }
-        
-        
+
+
         /**
             Поиск блока $block_type типа с именем $block_name
             @param $block_type - Тип блока (возможные типы: BLOCK, INSERT, ASSIGN)
@@ -453,10 +454,10 @@
                        "[ ]*:[ ]*" .
                        $block_name .
                        "[ ]*-->/Us", $buffer, $matches);
-            return $matches[1];
+            return isset($matches[1]) ? $matches[1] : NULL;
         }
-        
-        
+
+
         /**
             Поиск и замена сожержимого указанного блока на строку $replace
             @param $block_type - Тип блока (возможные типы: BLOCK, INSERT, ASSIGN)
@@ -477,8 +478,8 @@
                                 $block_name .
                                 "[ ]*-->/Us", $replace, $buffer, 1);
         }
-        
-        
+
+
         /**
             Рекурсивная функция возвращает древовидный массив всех ASSIGN блоков с метками
             @param $preassign_content - текст в котором необходимо провести поиск
@@ -499,12 +500,12 @@
                     // Рекурсивный вызов для поиска меток и блоков в найденном ASSIGTN блоке
                     $preassigned_data['block'][][$block_name] = $this->get_preassign_data($block_data);
                 }
-                
+
             // Возврат дерева ASSIGN блоков с метками
             return $preassigned_data;
         }
-        
-        
+
+
         /**
             Получить путь к файлу из полного имени файла
             @param $filename - Полный путь к файлу с именем файла
@@ -515,7 +516,7 @@
             // Если в имени файла встречается хотябы один символ '/'
            	if (strchr($filename, '/'))
                 return substr($filename, 0, strrpos($filename, '/') + 1);
-                
+
             return '';
         }
 
@@ -530,11 +531,11 @@
             // Если в имени файла встречается хотябы один символ '/'
             if(strchr($full_name, '/'))
                 return substr($full_name, strrpos($full_name, '/') + 1, strlen($full_name));
-                
+
             return $full_name;
         }
-            
-        
+
+
         /**
             Рекурсивная функция разворачивает все INSERT блоки и
             возвращает развернутый шаблон
@@ -555,14 +556,14 @@
             foreach ($insert_blocks as $insert_block)
             {
                 foreach ($insert_block as $tpl_file_name => $preassign_content);
-                
+
                 if (!file_exists($tpl_path . $tpl_file_name)) {
-                    echo "Can not find teamplate file '" . 
+                    echo "Can not find teamplate file '" .
                          $tpl_path . $tpl_file_name .
                          "' in parent teamplate file: '" . $parent_file . "'\n";
                     exit;
                 }
-                
+
                 // Загрузка шаблона указанного в INSERT блоке
                 $insert_content = file_get_contents($tpl_path . $tpl_file_name);
 
@@ -596,10 +597,10 @@
                                                            $block_name .
                                                            ' -->', $preassigned_content);
                     }
-                    
+
                 // поскольку вместо INSERT блока вставляется содержимое этого блока,
                 // то если в содержимом блоке встретится INSERT блок, то к нему надо дописать текущий путь.
-                
+
                 $insert_path_prefix = $this->get_file_path($tpl_file_name);
                 // рекурсивный запуск для поиска новых INSERT блоков в загруженном шаблоне
                 $preassigned_content = $this->do_insert_blocks($preassigned_content,
@@ -615,8 +616,8 @@
 
             return $tpl_content;
         }
-        
-        
+
+
         /**
             Удаление комментариев вида // или / *   * /
             @param $text - исходный текст
@@ -631,8 +632,9 @@
             $one_string_comment_opened = 0; // Флаг информирующий нахождение позиции открытия однострочного коментария
             $start_comment = 0; // Адрес начала найденного комментария
             $length = strlen($text); // Длинна всего текста
-            
+
             // Перебор текста по символьно
+            $found_star = 0;
             for($p = 0; $p < $length; $p++) {
                 switch($text[$p]) {
 
@@ -647,11 +649,11 @@
                         $end_comment = $p + 1; // конец комментария
                         $found_star = 0; // опускаем флаг нахождения *
                         $comment_opened = 0; // закрытие режима комментария
-                        
+
                         // Удаление комментария
-                        $before = substr($text, 0, $start_comment); 
+                        $before = substr($text, 0, $start_comment);
                         $after = substr($text, $end_comment, $length);
-                        $text = $before . $after; 
+                        $text = $before . $after;
                         // уменьшение длинны текста на длинну вырезанного комментария
                         $length -= $end_comment - $start_comment;
                         // уменьшение позиции указателя на длинну вырезанного комментария
@@ -659,7 +661,7 @@
                         $found_slash = 0;
                         break;
                     }
-                    
+
                     // Если предыдущий символ / и следующий / значит найден однострочный комментарий
                     if ($found_slash && !$one_string_comment_opened) {
                         $one_string_comment_opened = 1;
@@ -668,17 +670,17 @@
                         $start_comment = $p - 1;
                         break;
                     }
-                    
+
                     $found_slash = 1;
                 break;
-                
+
                 case '*':
                     // Если символ встретился внутри одинарной или двойной ковычки
                     if ($finded_quote || $finded_doble_quote)
                         break;
 
                     // Если предыдущий символ / а следующий * и найден не в нутри комментария,
-                    // значит это начало нового комментария                    
+                    // значит это начало нового комментария
                     if ($found_slash && !$comment_opened && !$one_string_comment_opened) {
                         $start_comment = $p - 1; // Сохраняем поцицию начала комментария
                         $found_slash = 0; // опускаем флаг нахождения /
@@ -688,18 +690,18 @@
                     else
                         $found_star = 1;
                 break;
-                
+
                 case "'": // если найдена одинарная ковычка
                     // Если одинарная ковычка найденна внутри двойных
                     if ($finded_doble_quote)
                         break;
-                    
+
                     if ($comment_opened || $one_string_comment_opened)
                         break;
-                    
+
                     $finded_quote = !$finded_quote;
                 break;
-                
+
                 case '"': // если найдена двойная ковычка
                     // Если двойная ковычка найденна внутри одинарных
                     if ($finded_quote)
@@ -707,22 +709,22 @@
 
                     if ($comment_opened || $one_string_comment_opened)
                         break;
-                        
+
                     $finded_doble_quote = !$finded_doble_quote;
                 break;
-                
+
                 // Если найден конец строки
                 case "\n":
                     // Если небыло найденно однострочного комметария
                     if(!$one_string_comment_opened)
                         break;
-                    
+
                     $end_comment = $p + 1;// конец однострочного комментария
-                    
+
                     // Удаляем комментарий
-                    $before = substr($text, 0, $start_comment); 
+                    $before = substr($text, 0, $start_comment);
                     $after = substr($text, $end_comment, $length);
-                    $text = $before . $after; 
+                    $text = $before . $after;
 
                     //Уменьшаем длинну текста на длинну вырезанного комментария
                     $length -= $end_comment - $start_comment;
@@ -731,7 +733,7 @@
                     $p -= $end_comment - $start_comment;
                     $one_string_comment_opened = 0;
                 break;
-                
+
                 default:
                     // В случае находждения любого отличного символа,
                     // опускаем флаги нахождения слэша или звездочки
@@ -739,11 +741,11 @@
                     $found_star = 0;
                 }
             }
-            
+
             return $text;
-        }        
-        
-        
+        }
+
+
         /**
             Сформировать имена блоков для компилируемых шаблонов
             @param $block_name - название блока
@@ -753,8 +755,8 @@
         {
             return 'compiled_block_' . $block_name;
         }
-        
-        
+
+
         /**
             Рекурсивная компиляция блоков
             @param $block_text - Исходный текст шаблона
@@ -764,7 +766,7 @@
         private function tpl_compile_blocks($block_text, $current_block_name = 'root')
         {
             $block_code = '';
-            
+
             $blocks = $this->find_blocks('BLOCK', $block_text);
             foreach ($blocks as $block) {
                 foreach($block as $block_name => $block_data);
@@ -779,7 +781,7 @@
                                                    $this->get_tpl_compile_block_name($block_name) .
                                                    ' . "');
             }
-            
+
             $block_text = preg_replace("/{(\w+)}/Us",
                                         "\". \$block_" . $current_block_name . "['$1'] .\"",
                                         $block_text);
@@ -787,11 +789,11 @@
             $block_text = str_replace("\n", '\n', $block_text);
             $block_text = '$' . $this->get_tpl_compile_block_name($current_block_name) .
                           ' .= "' . $block_text . '";' . "\n";
-            
+
             if ($list_blocks)
                 foreach ($list_blocks as $block_name => $block_data) {
                     $compile_block = '';
-                    
+
                     $compile_block = $this->tpl_compile_blocks($block_data, $block_name);
 
                     $compile_code = "\$" . $this->get_tpl_compile_block_name($block_name) . " = '';\n";
@@ -802,12 +804,12 @@
                     $compile_code .= "}\n";
                     $block_text = $compile_code . $block_text;
                 }
-            
-            
+
+
             return $block_text;
         }
-        
-        
+
+
         /**
             Рекурсивная функция генерации дерева блоков.
             Используется функцией assign() для ориентации в дереве блоков
@@ -817,17 +819,17 @@
         private function tpl_create_block_tree($block_text)
         {
             $list_blocks_tree = array();
-            
+
             $blocks = $this->find_blocks('BLOCK', $block_text);
             foreach ($blocks as $block) {
                 foreach ($block as $block_name => $block_data);
                 $list_blocks_tree[$block_name] = $this->tpl_create_block_tree($block_data);
             }
-            
+
             return $list_blocks_tree;
         }
-        
-        
+
+
         /**
             Компиляция массива в PHP программный код
             @param $arr - ассоциативный массив
@@ -837,11 +839,11 @@
         {
             foreach ($arr as $key => $val)
                 $str .= "'" . $key . "' => array(" . $this->array_compile($val) . "),";
-            
+
             return $str;
         }
-        
-        
+
+
         /**
             Компилирует шаблон и сохраняет его в файл $filename с расширением php
             @param $tpl_content - текст шаблона
@@ -851,29 +853,29 @@
         {
             // Формируем дерево блоков для шаблона
             $tree['root'] = $this->tpl_create_block_tree($tpl_content);
-            
+
             // Формирование PHP кода дерева блоков в шаблоне
-            $tpl_tree = "if(!\$run_teamplate)\n\t\$this->compiled_struct_tree = array(" . 
+            $tpl_tree = "if(!\$run_teamplate)\n\t\$this->compiled_struct_tree = array(" .
                         $this->array_compile($tree) . ');';
-            
+
             // Экранирование символов \ $ "
             $tpl_content = str_replace('\\', '\\\\', $tpl_content);
             $tpl_content = str_replace('$', '\\$', $tpl_content);
             $tpl_content = str_replace('"', '\\"', $tpl_content);
-            
+
             // Компиляция шаблона
             $compile_code = $this->tpl_compile_blocks($tpl_content);
-            
+
             // Формирование содержимого файла шаблона
-            $compile_code = "<?php\n " .$tpl_tree . 
+            $compile_code = "<?php\n " .$tpl_tree .
                             "\n\nif(\$run_teamplate){\n\$compiled_block_root = '';\n" .
                             $compile_code .
                             "\n }\n ?>";
-            
+
             // Сохранение файла в каталог .compiled
             $path = $this->get_file_path($filename);
             $file = $this->get_file_name($filename);
-            
+
             @mkdir($path . '.compiled/');
             file_put_contents($path . '.compiled/' . $file . '.php', $compile_code);
         }
@@ -892,19 +894,19 @@
                 $list = $this->get_children_blocks_by_tree($parent_block, $sub_block_list);
                 if ($list)
                     return $list;
-                    
+
                 if ($block_name == $parent_block) {
                     // формирование списка дочерних блоков
                     foreach($sub_block_list as $sub_block_name => $sub_block_array)
                         $list[] = $sub_block_name;
-                        
+
                     return $list;
                 }
             }
             return false;
         }
-        
-        
+
+
         /**
             Добавить данные блока в дерево блоков (используется в режими компиляции)
             @param $stack - путь к родительскому блоку
@@ -915,22 +917,22 @@
             // Извлечение последнего блока из списка,
             // этот блок является точкой назначения и потому для него особый алгоритм
             $last_block = array_pop($stack);
-            
+
             // Указатель $p в цикле будет двигаться по дереву до родительского блока (не включая последний)
             $p = &$this->assign_tree;
             foreach($stack as $item) {
                 $count_blocks = count($p['<blocks>'][$item]);
                 $p = &$p['<blocks>'][$item][$count_blocks ? ($count_blocks - 1) : 0];
             }
-            
+
             // После того как добрались до родительского элемента,
             // добавлется еще одна копия дочернего блока с данными $data
             $count_blocks = count($p['<blocks>'][$last_block]);
             $p['<blocks>'][$last_block][$count_blocks] = $data;
         }
     }
-    
-    
+
+
 
 
     /**
