@@ -254,5 +254,12 @@ function unlink_safe($file)
     @unlink($file);
 }
 
+function is_dir_empty($dir)
+{
+    if (!is_readable($dir))
+        return false;
+    return (count(scandir($dir)) == 2);
+}
+
 
 ?>
