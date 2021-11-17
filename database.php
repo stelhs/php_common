@@ -88,16 +88,26 @@ class Database {
     }
 
 
-    function insert($table_name, $array)
+    function insert($table_name, $data_with_comma, $data_wo_comma = NULL)
     {
         $query = "INSERT INTO " . $table_name . " SET ";
         $separator = '';
-        foreach ($array as $field => $value) {
+        foreach ($data_with_comma as $field => $value) {
             if($field == 'id')
                 continue;
-            $query .= $separator . '`' .  $field . '` = "' . $value . '"';
+            $query .= sprintf('%s`%s`="%s"', $separator, $field, $value);
             $separator = ',';
         }
+
+        if ($data_wo_comma) {
+            foreach ($data_wo_comma as $field => $value) {
+                if($field == 'id')
+                    continue;
+                $query .= sprintf('%s`%s`=%s', $separator, $field, $value);
+                $separator = ',';
+            }
+        }
+
         $result = mysqli_query($this->link, $query);
         if($result === FALSE) {
             $this->err("MySQL query error: '%s' error: %s",
@@ -109,13 +119,19 @@ class Database {
     }
 
 
-    function update($table, $id, $array)
+    function update($table, $id, $data_with_comma, $data_wo_comma = NULL)
     {
         $separator = '';
         $query = "UPDATE " . $table . " SET ";
-        foreach($array as $field     => $value) {
-            $query .= $separator . '`' .  $field . '` = "' . $value . '"';
+        foreach($data_with_comma as $field => $value) {
+            $query .= sprintf('%s`%s`="%s"', $separator, $field, $value);
             $separator = ',';
+        }
+        if ($data_wo_comma) {
+            foreach($data_wo_comma as $field => $value) {
+                $query .= sprintf('%s`%s`=%s', $separator, $field, $value);
+                $separator = ',';
+            }
         }
         $query .= " WHERE id = " . $id;
 
